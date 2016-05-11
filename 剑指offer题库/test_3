@@ -1,0 +1,85 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define row 4
+#define col 3
+
+//the first method
+int check_num(int (*p)[col], int num, int line, int rank)    //遍历数组
+{
+	int i = 0;
+	int j = 0;
+	for (i = 0; i < line; i++)
+	{
+		for (j = 0; j < rank; j++)
+		{
+			if (p[i][j] == num)
+				return 1;             //存在则返回1
+		}
+	}
+
+	return 0;
+}
+
+//the second method
+int check_num(int(*p)[col], int num, int line, int rank)
+{
+	for (int i = 0; i < line; i++)
+	{
+		if (num>=p[i][0]&&num <= p[i][rank - 1])     //判断num是否有可能在这行，如果在的话进入if
+		{
+			int *left = &p[i][0];
+			int *right = &p[i][rank - 1];
+			int *tmp = NULL;
+			while (left <= right)                  //折半查找法查找
+			{
+			    tmp = left + (right - left) / 2;
+				if (num>=*tmp)
+					left =tmp + 1;
+				if (num <= *tmp)
+					right = tmp - 1;
+				if (num == *tmp)
+					   return 1;                      //存在则返回1
+			}
+		}
+	}
+	return 0;
+}
+
+//the third method
+int check_num(int(*p)[col], int num, int line, int rank)
+{
+	int i = 0;
+	int j = rank-1;
+	while (i < line || j >= 0)
+	{
+		if (num < p[i][j])      //如果num小于i行最后一个数，则列自减
+			j--;
+		if (num>p[i][j])        //如果num大于i行最后一个数，则行自增
+			i++;
+		if (num == p[i][j])
+			return 1;                   // 存在则返回1
+	}
+	return 0;
+
+}
+
+int main()
+{
+	int n = 0;
+	int arr[row][col] = { 0 };
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j <col; j++)
+		{
+			scanf("%d", &arr[i][j]);
+		}
+	}
+	scanf("%d", &n);
+	int ret = check_num(arr, n, row, col);
+	if (ret==1)
+		printf("YES\n");
+	else
+		printf("NO\n");
+	system("pause");
+	return 0;
+}
