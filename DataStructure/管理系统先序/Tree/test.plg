@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: test - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP4054.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"G:\Tree\Tree\test.c"
+]
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP4054.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP4055.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test.pdb" /debug /machine:I386 /out:"Debug/test.exe" /pdbtype:sept 
+.\Debug\test.obj
+]
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP4055.tmp"
+<h3>Output Window</h3>
+Compiling...
+test.c
+G:\Tree\Tree\test.c(42) : error C2275: 'Tree' : illegal use of this type as an expression
+        g:\tree\tree\manage.h(25) : see declaration of 'Tree'
+G:\Tree\Tree\test.c(42) : error C2146: syntax error : missing ';' before identifier 'root'
+G:\Tree\Tree\test.c(42) : error C2065: 'root' : undeclared identifier
+G:\Tree\Tree\test.c(43) : error C2224: left of '.data' must have struct/union type
+G:\Tree\Tree\test.c(43) : error C2198: 'strcpy' : too few actual parameters
+G:\Tree\Tree\test.c(44) : error C2224: left of '.data' must have struct/union type
+G:\Tree\Tree\test.c(44) : error C2198: 'strcpy' : too few actual parameters
+G:\Tree\Tree\test.c(45) : error C2224: left of '.lchild' must have struct/union type
+G:\Tree\Tree\test.c(46) : error C2224: left of '.rchild' must have struct/union type
+G:\Tree\Tree\test.c(47) : error C2224: left of '.parent' must have struct/union type
+G:\Tree\Tree\test.c(48) : warning C4133: 'function' : incompatible types - from 'int *' to 'struct Tree *'
+Ö´ÐÐ cl.exe Ê±³ö´í.
+
+
+
+<h3>Results</h3>
+test.exe - 1 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
