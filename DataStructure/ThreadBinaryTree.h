@@ -39,7 +39,7 @@ public:
 	    InThreadTree();
 	}
 	
-	//ÖĞĞòÏßË÷»¯¶ş²æÊ÷
+	//ä¸­åºçº¿ç´¢åŒ–äºŒå‰æ ‘
 	void InThreadTree()
 	{
 		Node* prev = NULL;
@@ -47,7 +47,7 @@ public:
 		prev->_rightTag = THREAD;
 	}
 public:
-	//ÖĞĞò±éÀú ÖĞĞòÏßË÷»¯ ¶ş²æÊ÷
+	//ä¸­åºéå† ä¸­åºçº¿ç´¢åŒ– äºŒå‰æ ‘
 	/*void InOder()
 	{
 		if (_root == NULL)
@@ -67,7 +67,7 @@ public:
 		}
 		cout << endl;
 	}*/
-	//ÖĞĞò±éÀú £¨2£©
+	//ä¸­åºéå† ï¼ˆ2ï¼‰
 	void InOder()
 	{
 		Node* cur = NULL;
@@ -79,7 +79,7 @@ public:
 	}
 
 
-	//ÏÈĞò±éÀú   ÖĞĞòÏßË÷»¯¶ş²æÊ÷
+	//å…ˆåºéå†   ä¸­åºçº¿ç´¢åŒ–äºŒå‰æ ‘
 	void PrevOder()
 	{
 		if (_root == NULL)
@@ -114,34 +114,34 @@ public:
 		cout << endl;
 	}
 
-	//ºóĞò±éÀú ÖĞĞòÏßË÷»¯¶ş²æÊ÷
+	//ååºéå† ä¸­åºçº¿ç´¢åŒ–äºŒå‰æ ‘
 	void PostOder()
 	{
 		if (_root == NULL)
 			return;
 		Node* cur = _root;
-		while (cur->_leftTag == LINK || cur->_rightTag == LINK)       //Ñ°ÕÒµÚÒ»¸ö·ÃÎÊµÄ½áµã
+		while (cur->_leftTag == LINK || cur->_rightTag == LINK)       //å¯»æ‰¾ç¬¬ä¸€ä¸ªè®¿é—®çš„ç»“ç‚¹
 		{
 			if (cur->_leftTag == LINK)
 				cur = cur->_left;
 			else if (cur->_rightTag==LINK)
 			    cur = cur->_right;		
 		}
-		cout << cur->_data << " ";           //·ÃÎÊµÚÒ»¸ö½áµã
+		cout << cur->_data << " ";           //è®¿é—®ç¬¬ä¸€ä¸ªç»“ç‚¹
 		Node* p = NULL;
 		while ((p=Parent(cur))&&p!=NULL)
 		{
-			if (p->_right == cur||p->_rightTag==THREAD)  //Èç¹ûÒÑ¾­·ÃÎÊÍêÁËÓÒ×ÓÊ÷,»òÕßÓÒ×ÓÊ÷ÊÇÏßË÷
-				cur = p;                                  //curÌø×ªµ½¸¸½Úµã
+			if (p->_right == cur||p->_rightTag==THREAD)  //å¦‚æœå·²ç»è®¿é—®å®Œäº†å³å­æ ‘,æˆ–è€…å³å­æ ‘æ˜¯çº¿ç´¢
+				cur = p;                                  //curè·³è½¬åˆ°çˆ¶èŠ‚ç‚¹
 			else
 			{
 				cur =p->_right;
-				while (cur->_leftTag == LINK                //ÕÒµ½ÓÒ×ÓÊ÷ÏÂµÚÒ»¸ö·ÃÎÊµÄ½áµã
+				while (cur->_leftTag == LINK                //æ‰¾åˆ°å³å­æ ‘ä¸‹ç¬¬ä¸€ä¸ªè®¿é—®çš„ç»“ç‚¹
 					|| cur->_rightTag == LINK)   
 				{
 					if (cur->_leftTag == LINK)
 						cur = cur->_left;
-					else if (cur->_rightTag=LINK)
+					else if (cur->_rightTag==LINK)
 						cur = cur->_right;
 				}			
 			}
@@ -151,9 +151,9 @@ public:
 	}
 
 protected:
-	Node* Parent(Node* root)          //Ñ°ÕÒroot½áµãµÄ¸¸½Úµã
+	Node* Parent(Node* root)          //å¯»æ‰¾rootç»“ç‚¹çš„çˆ¶èŠ‚ç‚¹
 	{
-		if (root == NULL || root == _root) //Èç¹ûrootÊÇ¿Õ½áµã»ò¸ù½áµã£¬Ôò·µ»ØNULL
+		if (root == NULL || root == _root) //å¦‚æœrootæ˜¯ç©ºç»“ç‚¹æˆ–æ ¹ç»“ç‚¹ï¼Œåˆ™è¿”å›NULL
 			return NULL;
 		Node* cur =root;
 		while (cur->_leftTag != THREAD)
@@ -178,7 +178,7 @@ protected:
 		return cur;
 	}
 
-	Node* Frist(Node* root)        //Ñ°ÕÒÒÔrootÎª¸ù½ÚµãµÄÊ÷,ÖĞĞò±éÀúÏÂµÄµÚÒ»¸ö½áµã
+	Node* Frist(Node* root)        //å¯»æ‰¾ä»¥rootä¸ºæ ¹èŠ‚ç‚¹çš„æ ‘,ä¸­åºéå†ä¸‹çš„ç¬¬ä¸€ä¸ªç»“ç‚¹
 	{
 		if (root == NULL)
 			return NULL;
@@ -190,17 +190,17 @@ protected:
 		return cur;
 	}
 
-	Node* Next(Node *root)          //Ñ°ÕÒÖĞĞò±éÀúÏÂrootµÄºó¼Ì½áµã
+	Node* Next(Node *root)          //å¯»æ‰¾ä¸­åºéå†ä¸‹rootçš„åç»§ç»“ç‚¹
 	{
 		if (root == NULL)
 			return NULL;
 		Node* cur = root;
 		if(cur->_rightTag ==THREAD)
-			return cur->_right;                   //Ö±½Ó·µ»Øºó¼Ì
-		return Frist(cur->_right);                 //·µ»ØÓÒ×ÓÊ÷ÏÂ·ÃÎÊµÄµÚÒ»¸ö½áµã
+			return cur->_right;                   //ç›´æ¥è¿”å›åç»§
+		return Frist(cur->_right);                 //è¿”å›å³å­æ ‘ä¸‹è®¿é—®çš„ç¬¬ä¸€ä¸ªç»“ç‚¹
 	}
 
-	Node* Last(Node *root)         //Ñ°ÕÒÒÔrootÎª¸ù½ÚµãµÄÊ÷,ÖĞĞò±éÀúÏÂµÄ×îºóÒ»¸ö½áµã
+	Node* Last(Node *root)         //å¯»æ‰¾ä»¥rootä¸ºæ ¹èŠ‚ç‚¹çš„æ ‘,ä¸­åºéå†ä¸‹çš„æœ€åä¸€ä¸ªç»“ç‚¹
 	{
 		if (root == NULL)
 			return NULL;
@@ -210,20 +210,20 @@ protected:
 		return cur;
 	}
 
-	Node* Prior(Node *root)        //Ñ°ÕÒÖĞĞò±éÀúÏÂrootµÄÇ°¼Ì½áµã
+	Node* Prior(Node *root)        //å¯»æ‰¾ä¸­åºéå†ä¸‹rootçš„å‰ç»§ç»“ç‚¹
 	{
 		if (root == NULL)
 			return NULL;
 		Node* cur = root;
 		if (cur->_leftTag == THREAD)
-			return cur->_left;              //Ö±½Ó·µ»ØÇ°¼Ì¼¸µã
-		return Last(cur->_left);            //·µ»Ø×ó×ÓÊ÷ÏÂ×îºóÒ»¸ö·ÃÎÊµÄ½áµã
+			return cur->_left;              //ç›´æ¥è¿”å›å‰ç»§å‡ ç‚¹
+		return Last(cur->_left);            //è¿”å›å·¦å­æ ‘ä¸‹æœ€åä¸€ä¸ªè®¿é—®çš„ç»“ç‚¹
 	}
 
 
 	Node* _CreatTree(const T* a, size_t size, size_t& index, const T& invalid)
 	{
-		//´´½¨Ò»¿Å¶ş²æÊ÷
+		//åˆ›å»ºä¸€é¢—äºŒå‰æ ‘
 		Node* root = NULL;
 		if (index < size&&a[index] != invalid)
 		{
@@ -234,19 +234,19 @@ protected:
 		return root;
 	}
 
-	//ÖĞĞòÏßË÷»¯¶ş²æÊ÷
+	//ä¸­åºçº¿ç´¢åŒ–äºŒå‰æ ‘
 	void _InThreadTree(Node* root, Node* &prev)
 	{
 		if (NULL == root)
 			return;
 		_InThreadTree(root->_left, prev);
-		if (root->_left == NULL)                //ÏßË÷»¯Ç°Çı
+		if (root->_left == NULL)                //çº¿ç´¢åŒ–å‰é©±
 		{
 			root->_leftTag = THREAD;
 			root->_left = prev;
 			prev = root;
 		}
-		if (prev != root&&prev->_right == NULL)      //ÏßË÷»¯ºó¼Ì
+		if (prev != root&&prev->_right == NULL)      //çº¿ç´¢åŒ–åç»§
 		{
 			prev->_rightTag = THREAD;
 			prev->_right = root;
