@@ -1,363 +1,317 @@
 #pragma once
-#include<stack>
+#include<queue>
 using namespace std;
- template<typename K,typename V>
- struct AvlTreeNode
- {
-	 K _key;
-	 V _value;
-	 int _bf;           //平衡因子，等于右子树的高度减去左子树的高度
-	 AvlTreeNode<K, V>  *_left;
-	 AvlTreeNode<K, V>  *_right;
-	 AvlTreeNode(const K& key,const V& value=V())
-		 :_key(key)
-		 , _value(value)
-		 , _bf(0)
-		 , _left(NULL)
-		 , _right(NULL)
-	 {}
- };
+template<typename K,typename V>
+struct AVLTreeNode
+{
+	K _key;
+	V _value;
+	int _bf;           //平衡因子，右子树的高度减去左子树的高度
+	AVLTreeNode<K, V> *_left;
+	AVLTreeNode<K, V> *_right;
+	AVLTreeNode<K, V> *_parent;
+	AVLTreeNode(K key, V value)
+		:_key(key)
+		, _value(value)
+		, _bf(0)
+		, _left(NULL)
+		, _right(NULL)
+		, _parent(NULL)
+	{}
+};
 
 
- template<typename K,typename V>
- class AvlTree
- {
-	 typedef AvlTreeNode<K, V> Node;
- public:
-	 AvlTree()
-		 :_root(NULL)
-	 {}
-	 AvlTree(K* a,size_t size)
-		 :_root(NULL)
-	 {
-		 for (int i = 0; i < (int)size; i++)
-		 {
-			 Insert(a[i]);
-		 }
-	 }
+template<typename K,typename V>
+class AVLTree
+{
+	typedef AVLTreeNode<K, V> Node;
+public:
+	AVLTree()
+		:_root(NULL)
+	{}
 
-	 ~AvlTree()
-	 {
-		 _Destory(_root);
-	 }
+	AVLTree(const AVLTree<K,V>& tree)
+		:_root(NULL)
+	{
+		_Copy(tree._root,_root);
+	}
 
-	 bool Insert(const K& k)
-	 {
-		 Node* parent = NULL;
-		 Node* cur= _root;
-		 stack<Node*> s;
-		 while (cur != NULL)
-		 {
-			 s.push(cur);
-			 if (k < cur->_key)
-				 cur = cur->_left;
-			 else if (k>cur->_key)
-				 cur = cur->_right;
-			 else
-				 return false;                 //找到则不插入
-		 }
-		 cur = new Node(k);                    //开辟一个新结点
-		 if (s.empty())                        //如果栈为空
-		 {
-			 _root = cur;                       //新节点直接插入
-			 return true;
-		 }
-		 parent = s.top();           //让parent指向这个插入位置的父亲
-		 if (k>parent->_key)
-		 {
-			 parent->_right = cur;   //如果要插入的结点大于父节点
-		 }
-		 else 
-		 {
-			 parent->_left = cur;     //如果要插入的结点小于父节点
-		 }
-		 while (!s.empty())            //重新平衡化
-		 {
-			 parent = s.top();         //从栈中退出父节点
-			 s.pop();
-			 if (parent->_left ==cur)   //如果cur是parent的左孩子，则parent的平衡因子减一
-				 parent->_bf--;
-			 else                      //如果cur是parent的左孩子，则parent的平衡因子加一
-				 parent->_bf++;
+	AVLTree<K, V>& operator=(const AVLTree<K,V>& avl)
+	{
+		if (this != &avl)
+		{
+			AVLTree<K, V> tmp(avl);
+			swap(_root,tmp._root);
+		}
+		return *this;
+	}
 
-			 if (parent->_bf == 0)       //如果父节点的平衡因子为0，则已经平衡,跳出循环
-				 break;
-			 if (parent->_bf == 1 || parent->_bf == -1)      //如果父节点的平衡因子的绝对值为1
-				 cur = parent;                //则继续向上回溯，考察父节点的平衡状态
-			 else                             //需要做平衡化处理
-			 {
-				 int d = 0;            //用于区别单双旋转
-				 if (parent->_bf < 0)  //得到父节点的平衡因子的正负
-					 d = -1;           
-				 else
-					 d = 1;
-				 if (cur->_bf == d)    //如果父节点的平衡因子与d同号，则说明进行了外插入，要单旋转恢复
-				 {
-					 if (d == -1)            //父节点的左子树高度高，进行右旋转恢复
-						 RotateRight(parent);
-					 else                     //父节点的右子树高度高，进行左旋转恢复
-						 RotateLeft(parent);
+ 	~AVLTree()
+	{
+		_Destory(_root);
+	}
 
-				 }
-				 else            //进行了内侧插入，要双旋转恢复
-				 {
-					 if (d == -1)    //父节点的左子树高度高，则进行先左后右
-						 DoubleRotateLR(parent);
-					 else             //父节点的右子树高度高，则进行先右后左
-						 DoubleRotateRL(parent);
-				 }
-				 //重新平衡后，parent的高度降低，无需向上进行回溯
-				 break;
-			 }
-		 }
+	bool Insert(const K& key,const V& value)
+	{
+		Node* cur = _root;
+		Node* parent = NULL;
+		while (cur)                        //寻找要插入的位置
+		{
+			if (cur->_key < key)
+			{
+				parent = cur;
+				cur = cur->_right;
+			}
+			else if (cur->_key>key)
+			{
+				parent = cur;
+				cur = cur->_left;
+			}
+			else
+				return false;             //如果已经存在就不插入
+		}
 
-		 if (!s.empty())          //如果栈不为空，则需要进行重新连接
-		 {
-			 cur = s.top();
-			 if (cur->_key > parent->_key)
-				 cur->_left = parent;
-			 else
-				 cur->_right = parent;
-		 }
-		 else
-			 _root = parent;                 //如果栈为空,调整到根节点
-		 return true;
-	 }
+		cur = new Node(key,value);
+		if (parent!=NULL)                 //树不是空树
+		{
+			if (parent->_key < key)
+				parent->_right = cur;
+			else
+				parent->_left = cur;
+			cur->_parent = parent;
+		}
+		else                             //树是空树
+		{
+			_root = cur;
+			return true;
+		}
 
-	 bool Remove(const K& k)            //删除一个结点
-	 {
-		 int dd = 0;                   //用来标记旋转之后与上层的链接关系
-		 int d = 0;
-		 Node* tmp = NULL;          //用来保存祖父结点
-		 Node* cur = _root;
-		 Node* del = NULL;
-		 Node* parent = NULL;
-		 stack<Node*> s;
-		 while (cur != NULL)
-		 {
-			 s.push(cur);                //保存从根节点到删除结点之间的路径
-			 if (cur->_key < k)
-				 cur = cur->_right;
-			 else if (cur->_key>k)
-				 cur = cur->_left;
-			 else
-				 break;
-		 }
-		 if (cur == NULL)
-			 return false;                   //找不到删除失败
-		 //如果被删除的结点有两个子女，则先转换成一个子女的情况
-		 if (cur->_left != NULL&&cur->_right != NULL)
-		 {
-			 Node* minRight = cur->_right;       //minRight保存cur右子树的最小值
-			 while (minRight->_left)
-			 {
-				 s.push(minRight);
-				 minRight = minRight->_left;
-			 }
-			 cur->_key = minRight->_key;
-			 cur->_value = minRight->_value;
-			 cur = minRight;         //让cur指向被删除的结点
-			 s.push(cur);            //让要删除的结点入栈
-		 }
-		 s.pop();                    //抛出要删除的结点
-		 if (s.empty())               //如果要删除的是根节点
-		 {
-			 if (cur->_left != NULL)
-				 _root = cur->_left;
-			 else
-				 _root = cur->_right;
-			 delete cur;
-			 return true;
-		 }
+		if (cur == parent->_left)        //如果插入的位置是父节点的左孩子
+			parent->_bf--;
+		else
+			parent->_bf++;               //如果插入的位置是父节点的右孩子
 
-		 parent = s.top();           //parent保存要删除结点的父节点
-		 del = cur;                  //被删除的结点保存到del里面
-		 if (cur->_left != NULL)     //要删除的结点只有一个子女，并进行链接
-		 {
-			 parent = cur->_left;
-			 cur = cur->_left;
-		 }
-		 else
-		 {
-			 parent = cur->_right;
-			 cur = cur->_right;
-		 }
+		while (parent != NULL)             //沿着插入位置到根节点回溯，查找平衡因子不满足的结点
+		{
+			if (parent->_bf == 0)          //表明插入之后parent这棵树的高度没变，因此这时就是AVL树
+			{
+				return true;
+			}
+			else if (parent->_bf == 1 || parent->_bf == -1)  //parent这棵树满足AVL,因为parent的高度发生变化，还要向上查找祖先结点
+			{
+				Node* ppNode = parent->_parent;      //保存parent的父节点 
+				if (ppNode != NULL)
+				{
+					if (ppNode->_left == parent)      //ppNode的左子树高度发生变化
+						ppNode->_bf--;
+					else                              //ppNode的右子树高度发生变化
+						ppNode->_bf++;
+				}
+				parent = parent->_parent;      //当前树满足AVL树，所以继续向上判断
+			}
+			else          //如果当前树不满足AVL树，则就进行旋转恢复平衡
+			{
+				if (parent->_bf==2)          //如果parent的右子树高
+				{
+					if (parent->_right->_bf == 1)      //parent一定不是叶子节点，所以他的孩子不为空
+						RotateL(parent);             //因为子树与parent一样都是右子树高，进行单左旋
+					else                       //parent的右子树高，它的孩子左子树高，右左双旋
+						RotateRL(parent);
+				}
+				else if(parent->_bf==-2)         //parent的左子树高度高
+				{
+					if (parent->_left->_bf == -1)  //parent孩子的左子树高
+						RotateR(parent);          //右单旋
+					else                   //parent的左子树高，它的孩子右子树高，左右双旋
+						RotateLR(parent);
+				}
+				break;                      //旋转之后这棵树的高度恢复成原来的高度
+			}
+		}
+		return true;
+	}
 
-		//重新平衡化
-		 while(!s.empty())
-		 {
-			 parent=s.top();           //parnet保存父节点
-			 s.pop();                  //抛出父节点
-			 if (parent->_left == cur)   //cur在parent的左子树,调整父节点的平衡因子
-				 parent->_bf++;
-			 else
-				 parent->_bf--;
-			 if (!s.empty())             //如果栈不为空
-			 {
-			     tmp = s.top();        //tmp保存cur的祖父结点
-				 if (tmp->_left == parent)     //dd表示旋转后与上层的链接方向
-					 dd = -1;                  //旋转之后与上层左链接
-				 else
-					 dd = 1;                    //旋转之后与上层右链接
-			 }
-			 else
-				 dd = 0;                         //旋转之后不与上层链接
 
-			 if (parent->_bf == 1 || parent->_bf == -1)   //删除后树的高度不变
-				 break;
-			 if (parent!= 0)          //原来parent的高度不为0，且较矮的子树被缩短
-			 {
-				 if (parent->_bf < 0)      //如果叫高的子树是左子树
-				 {
-					 d = -1;
-					 cur = parent->_left;    //cur指向较高的子树
-				 }
-				 else                   //较高的子树是右子树
-				 {
-					 d = 1;
-					 cur = parent->_right;
-				 }
-				 if (cur->_bf == 0)          //如果较高的子树平衡因子是0,则进行一次单旋转
-				 {
-					 if (d == -1)              //右旋转,较高子树是左子树
-						 RotateRight(parent);
-					 else
-						 RotateLeft(parent);   //左旋转，较高子树是右子树
-					 break;                   //旋转完成之后树的高度不变，则直接跳出循化
-				 }
-				 if (cur->_bf==d) //如果较高子树与父节点平衡因子同号，单旋转,旋转之后树的高度改变
-				 {
-					 if (d == -1)              //右旋转,较高子树是左子树
-						 RotateRight(parent);
-					 else
-						 RotateLeft(parent);   //左旋转，较高子树是右子树
-				 }
-				 else              //双旋转
-				 {
-					 if (d == -1)
-						 DoubleRotateLR(parent);
-					 else
-						 DoubleRotateRL(parent);
-				 }
-				 //与上层进行链接
-				 if (dd == -1)
-					 tmp->_left = parent;
-				 else if (dd == 1)
-					 tmp->_right = parent;				 
-			 }
-			 cur = parent;      //cur保存当前parent,用于回溯
-		 }
-		 if (s.empty())
-			 _root = parent;
-		 return true;
-	 }
+	bool Remove(const K& key)
+	{
+		Node* parent = NULL;
+		Node* cur = _root;
+		Node* del = NULL;        //用来指向要删除的位置
+		while (cur)                  //寻找要删除的位置
+		{
+			if (cur->_key < key)
+			{
+				cur = cur->_right;
+			}
+			else if (cur->_key>key)
+			{
+				cur = cur->_left;
+			}
+			else
+				break;
+		}
 
-	 bool Find(const K& k)
-	 {
-		 Node* cur = _root;
-		 while (cur)
-		 {
-			 if (k < cur->_key)
-				 cur = cur->_left;
-			 else if (k>cur->_key)
-				 cur = cur->_right;
-			 else
-				 return true;
-		 }
-		 return false;
-	 }
+		if (cur == NULL)                 //删除失败
+			return false;
+		del = cur;
+	//如果要删除的结点有两个孩子，则寻找右子树最左结点，将问题转换成只有一个孩子或没有孩子的形式
+		if (cur->_left != NULL&&cur->_right != NULL)
+		{
+			cur = cur->_right;          //cur的右孩子一定不为空
+			while (cur->_left)
+			{
+				cur = cur->_left;
+			}
 
-	 void InOder()
-	 {
-		 _InOder(_root);
-	 }
- protected:
-	 void _InOder(Node* root)
-	 {
-		 if (root == NULL)
-			 return;
-		 _InOder(root->_left);
-		 cout << root->_key << " " << root->_bf << endl;
-		 _InOder(root->_right);
-	 }
+			del->_key = cur->_key;
+			del->_value = cur->_value;
 
-	 void RotateLeft(Node *&ptr)                         //左旋转
-	 {
-		 Node* subL= ptr;              //subL指向ptr结点
-		 ptr = ptr->_right;            //让ptr指向新的根结点
-		 subL->_right = ptr->_left;    //让ptr的左子树链接到subL的右子树上
-		 ptr->_left = subL;            //让subL成为ptr的左子树
-		 ptr->_bf = 0;                 //因为左旋之后ptr的左右子树高度相同，所以平衡因子为0
-		 subL->_bf = 0;                //subL的左右子树的高度也相同，平衡因子也为0
-	 }
+			del = cur;           //交换之后让del指向这个要删除的结点
+		}
 
-	 void RotateRight(Node* &ptr)                        //右旋转
-	 {
-		 Node* subR = ptr;            //subL指向ptr
-	     ptr = ptr->_left;            //ptr指向新的根节点
-		 subR->_left = ptr->_right;   //ptr的右子树链接到subR的左子树上
-		 ptr->_right = subR;           //让subR成为新根的右子树
-		 ptr->_bf = 0;                //调整平衡因子
-		 subR->_bf = 0;
-	 }
+		parent = cur->_parent;        //让parent指向要删除的结点的父亲
+		if (cur->_left == NULL)       //要删除的结点的左孩子为空,或者都为空
+		{
+			if (parent == NULL)
+			{
+				_root = cur->_right;
+				if (cur->_right)           //如果cur有右孩子，则右孩子直接做根
+					cur->_right->_parent = NULL;
+			}
+			else
+			{
+				if (parent->_left == cur)
+					parent->_left = cur->_right;
+				else
+					parent->_right = cur->_right;
+				if (cur->_right)                    //cur的右子树不为空
+					cur->_right->_parent = parent;
+			}
+			cur = del->_right;           //cur更新到要删除结点的右子树
+		}
+		else                        //要删除的结点的右孩子为空，左孩子不为空
+		{
+			if (parent == NULL)               //如果要删除的结点是头结点
+				_root = cur->_left;
+			else                                    //删除的结点不是根节点，则进行链接
+			{
+				if (parent->_left == cur)
+					parent->_left = cur->_left;
+				else
+					parent->_right = cur->_left;
+				cur->_left->_parent = parent;
+			}
+			cur = del->_left;            //cur更新到要删除结点的左子树
+		}
 
-	 void DoubleRotateLR(Node* &ptr)                    //双旋转，先左后右
-	 {
-		 Node* subL = ptr->_left;        //让subL指向ptr的左孩子
-		 Node* subR = subL->_right;      //让subR指向subL的右孩子，即指向ptr的孙子结点
+		//因为要删除的结点之后的子树的高度不变，不需要修改，需要从parent向上判断是否平衡
+		while (parent)           //只要parent不为空，就有可能不平衡
+		{
+			//调整parent的平衡因子
+			if (parent->_left == cur)   //删除的是parent的左子树
+				parent->_bf++;
+			else
+				parent->_bf--;
 
-		 //先进行左旋，将内侧插入转换为外侧插入，即将双旋转转换为单旋转
-		 subL->_right = subR->_left;     //让subR的左链接到subL的右上
-		 subR->_left = subL;             //让subR重新成为根
+			if (parent->_bf == 1 || parent->_bf == -1) //原来平衡，删除一个后树高度不变，整棵树已经平衡
+			{
+				break;
+			}
 
-		 //调整平衡因子
-		 if (subR->_bf <= 0)     //subR的左子树高度不小于右子树
-			 subL->_bf = 0;      //因为subL的左子树下移一层，所以平衡因子为0
-		 else                    //subR的右子树高度高，subR左子树的高度不变
-			 subL->_bf =-1;       //而subL的左子树要下移一层
+		    //平衡因子原来不为0，删除一个高的子树之后变为0，需要继续向上寻找
+			if (parent->_bf != 0)    //平衡因子原来不为0，且比较矮的子树被删除
+			{
+				if (cur == NULL)
+				{
+					if (parent->_left == NULL)
+						cur = parent->_right;
+					else
+						cur = parent->_left;
+				}
+				else
+				{
+					if (parent->_left == cur)   //原来parent的比较矮的左子树被删除,让cur指向较高的子树
+						cur = parent->_right;
+					else
+						cur = parent->_left;
+				}
 
-		 //再进行右旋，转换成平衡树
-		 ptr->_left = subR->_right;
-		 subR->_right = ptr;
 
-		 //调整平衡因子
-		 if (subR->_bf== -1)       //subR的右子树高度小于左子树
-			 ptr->_bf = 1;         //ptr的右子树下移,subR原来的右子树上移
-		 else                      //subR的右子树的高度不小于左子树高度
-			 ptr->_bf = 0;         //subR的右子树高度不变，ptr的右子树下移
-		 subR->_bf = 0;             //新的根节点的平衡因子为0
-		 ptr = subR;               //让ptr指向恢复平衡后的新的根
-	 }
+				if (cur->_bf == 0)       //cur的平衡因子为0，单旋转就可以平衡，而且parent这棵树的高度不变
+				{
+					if (parent->_bf < 0)  //parent的左子树高，进行右旋转
+					{
+						RotateR(parent);        //parent旋转后指向这棵旋转子树的新根
+						parent->_bf=1;         
+						parent->_right->_bf= -1;
+					}
+					else          //进行左旋转
+					{
+						RotateL(parent);
+						parent->_bf =-1;
+						parent->_left->_bf =1;
+					}
+					break;
+				}
+				//如果parent与较高的子树同号，则进行单旋转，旋转自后树的高度没有恢复成删除之前的，所以继续向上找
+				int d = parent->_bf - cur->_bf;   //用d来判断是否同号，同号的话为1或-1，因为parent->_bf为2或-2，cur->_bf为1或-1
+				if (d == 1 || d == -1)
+				{
+					if (d == 1)       //右子树高，要进行左旋
+						RotateL(parent);
+					else
+						RotateR(parent);      //左子树高，进行右旋
+				}
+				else              //要双旋处理,因为异号，所以d为3或-3
+				{
+					if (d == 3)       //parent->_bf为2，cur->_bf为-1,右左双旋
+						RotateRL(parent);
+					else
+						RotateLR(parent);
+				}
+			}
+			cur = parent;
+			parent = parent->_parent;
+		}
+		delete del;
+		return true;
+	}
 
-	 void DoubleRotateRL(Node* &ptr)                   //双旋转，先右后左
-	 {
-		 Node* subR = ptr->_right;
-		 Node* subL = subR->_left;
+	bool Find(const K& key)
+	{
+		Node* cur = _root;
+		while (cur)
+		{
+			if (cur->_key < key)
+				cur = cur->_right;
+			else if (cur->_key>key)
+				cur = cur->_left;
+			else
+				return true;
+		}
+		return false;
+	}
 
-		 //先进行右旋，将内侧插入转换成外侧插入
- 		 subR->_left = subL->_right;
-		 subL->_right = subR;
-
-		 //调节平衡因子
-		 if (subL->_bf == -1)  //subL的右子树高度小于左子树
-			 subR->_bf = 1;    //subR的右子树下移
-		 else                  //subL的右子树高度不小于左子树高度
-			 subR->_bf = 0;
-
-		 //左旋
-		 ptr->_right = subL->_left;
-		 subL->_left = ptr;
-
-		 //调节平衡因子
-		 if (subL->_bf <= 0)     //subL的左子树高度不大于右子树高度
-			 ptr->_bf = 0;       //ptr的右子树下移，subL的右子树高度上移
-		 else
-			 ptr->_bf = -1;       
-		 subL->_bf = 0;
-		 ptr = subL;              //让ptr指向恢复平衡后的新的根
-	 }
+	void InOder()
+	{
+		_InOder(_root);
+	}
 protected:
-	void  _Destory(Node* root)
+	void _Copy(Node* root,Node *&newroot)
+	{
+		if (root == NULL)
+			return;
+		Node* node = new Node(root->_key, root->_value);
+		node->_bf = root->_bf;
+		newroot = node;
+		node->_parent = newroot;
+
+		_Copy(root->_left,newroot->_left);
+		_Copy(root->_right, newroot->_right);
+	
+	}
+
+	void _Destory(Node* root)
 	{
 		if (root == NULL)
 			return;
@@ -365,9 +319,120 @@ protected:
 		_Destory(root->_right);
 		delete root;
 	}
+
+	void _InOder(Node* root)
+	{
+		if (root == NULL)
+			return;
+		_InOder(root->_left);
+		cout << root->_key << " " << root->_bf << endl;
+		_InOder(root->_right);
+	}
+
+	void RotateL(Node *&parent)         //左单旋
+	{
+		Node* subR = parent->_right; 
+		Node* subRL = subR->_left;
+		Node* ppNode = parent->_parent;      //保存parent的父节点
+
+		parent->_right = subRL;
+		if (subRL != NULL)
+			subRL->_parent = parent;
+
+		subR->_left = parent;
+		parent->_parent = subR;
+
+		if (ppNode == NULL)
+		{
+			_root = subR;
+			subR->_parent = NULL;
+		}
+		else
+		{
+			if (ppNode->_left == parent)
+				ppNode->_left = subR;          //让旋转的这棵树的根节点重新与上层链接
+			else
+				ppNode->_right = subR;         //让旋转的这棵树的根节点重新与上层链接
+			subR->_parent = ppNode;
+		}
+		parent->_bf = subR->_bf = 0;      //subR和parent又归于平衡
+		parent = subR;                   //让parent重新指向这棵树的根
+	}
+
+	void RotateR(Node * &parent)       //右单旋
+	{
+		Node* subL = parent->_left;         
+		Node* subLR = subL->_right;
+		Node* ppNode = parent->_parent;      //保存parent的父节点
+
+		parent->_left = subLR;
+		if (subLR != NULL)
+			subLR->_parent = parent;
+
+		subL->_right = parent;
+		parent->_parent = subL;
+		 
+		if (ppNode == NULL)             //如果parent是空
+		{
+			_root = subL;
+			subL->_parent = NULL;
+		}
+		else
+		{
+			if (ppNode->_left == parent)
+				ppNode->_left = subL;                 //让旋转的这棵树的根节点重新与上层链接
+			else
+				ppNode->_right = subL;                  //让旋转的这棵树的根节点重新与上层链接
+			subL->_parent = ppNode;
+		}
+		parent->_bf = subL->_bf=0;        //parent与subL又趋于平衡       
+		parent = subL;                    //让parent重新指向这棵树的根
+	}
+
+	void RotateLR(Node *&parent)       //左右双旋
+	{
+		Node* tmp = parent->_left ;
+		Node* tmp2 = parent;
+
+		Node* subL = parent->_left;
+		Node* subLR = subL->_right;
+		int d1 = 0;
+		int d2 = 0;
+		if (subLR->_bf==1)        //右子树子树变高
+			d1 =-1;
+		if (subLR->_bf == -1)       //左子树高
+			d2 = 1;
+		
+		RotateL(tmp);
+		RotateR(tmp2);
+
+		subL->_bf = d1;
+		parent->_bf=d2;
+		parent = subLR;          //让parent重新指向这棵树的根
+	}
+
+	void RotateRL(Node* &parent)        //右左双旋
+	{
+		Node* tmp = parent->_right;
+		Node* tmp2 = parent;
+
+		Node* subR = parent->_right;       //记录subR和parent的平衡因子
+		Node* subRL = subR->_left;
+		int d1 = 0;
+		int d2 = 0;
+		if (subRL->_bf == -1)
+			d1 = 1;
+		if (subRL->_bf == 1)
+			d2 = -1;
+
+		RotateR(tmp);
+		RotateL(tmp2);
+
+		subR->_bf = d1;
+		parent->_bf = d2;
+
+		parent = subRL;         //让parent重新指向这棵树的根
+	}
 private:
-	AvlTree(const AvlTree<K,V>&);
-	AvlTree<K,V>& operator=(const AvlTree<K,V>&);
-private:
-	 Node* _root;
- };
+	Node* _root;
+};
