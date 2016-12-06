@@ -70,7 +70,7 @@ public:
 		}
 
 		//还有已经分配好的未被使用的内存
-		T* object =(T*)_last->_memory + _countIn;
+		T* object =(T*)((char*)_last->_memory + _countIn*_itemSize);
 		_countIn++;
 		return new(object) T();        //将这块空间用重定位new初始化一下
 	}
